@@ -1,3 +1,5 @@
+import {notifyPending} from '../server/notifications.mjs';
+
 const attempts = new Map();
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_REQUEST_BYTES = 12000;
@@ -64,6 +66,7 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error('Storage rejected');
     const saved=await response.json();
     if (saved.ok!==true || saved.requestId!==requestId) throw new Error('No storage receipt');
+    try {await notifyPending();}catch {console.error('Notification worker will retry',requestId);}
     return reply(res, 200, {ok:true,requestId});
   } catch {
     console.error('Contact storage could not be confirmed', requestId);

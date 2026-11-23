@@ -1,0 +1,8 @@
+{
+  "name": "affarsleads",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "nodemailer": "10.6.1"
+  }
+}

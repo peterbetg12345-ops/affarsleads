@@ -4,7 +4,7 @@ Svensk webbplats för Affärsleads: kontaktlistor, copy, e-postutskick och uppf�
 
 ## Teknik
 
-HTML, CSS och JavaScript utan byggsteg eller externa frontendberoenden. En Vercel Node-funktion i `api/contact.mjs` tar emot kontaktförfrågningar. `vercel.json` anger publicering och säkerhetshuvuden. Webbplatsen publiceras på Vercel från GitHub.
+HTML, CSS och JavaScript utan byggsteg eller externa frontendberoenden. Nodemailer är versionslåst för serverns SMTP-utskick. En Vercel Node-funktion i `api/contact.mjs` tar emot kontaktförfrågningar. `vercel.json` anger publicering och säkerhetshuvuden. Webbplatsen publiceras på Vercel från GitHub.
 
 ## Erbjudande och avsändare
 
@@ -20,7 +20,13 @@ Vid fel eller timeout behålls formulärets innehåll. Ett återförsök med sam
 
 Supabase-tabellen har RLS och en uttrycklig nekande policy samt inga tabellrättigheter för anonyma eller inloggade webbplatsbesökare. Endast Edge-funktionens serverroll får läsa och skriva. RPC-funktionen är security invoker och får bara anropas av service_role. Rå IP-adress sparas inte; en saltad hash används för försöksgränsen. Inga kontaktuppgifter eller nycklar skrivs till applikationens loggar.
 
-Den separata mejllänken till `peter@affarsleads.se` finns kvar som alternativ. Kontaktflödet skickar inga notifieringsmejl. Förfrågningar läses i Supabase Table Editor.
+Den separata mejllänken till `peter@affarsleads.se` finns kvar som alternativ. Varje ny förfrågan läggs i en skyddad utkorg i samma databastransaktion och mejlas från `peter@affarsleads.se` till **peterbetg12345@gmail.com**. Kundens adress sätts som Reply-To. Förfrågningar kan också läsas i Supabase Table Editor.
+
+Mejlet innehåller namn, företag, e-postadress, valt paket, meddelande och mottagningstid. SMTP-uppgifterna och `NOTIFICATION_TOKEN` finns bara krypterade på Vercel. En hash av den interna token skyddar Supabase-funktionens administrativa köåtgärder. Utkorgen har RLS och inga besökarrättigheter.
+
+En serverarbetare försöker skicka direkt efter lagring. Supabase Cron anropar dessutom `/api/notifications` var femte minut med en autentiseringstoken från Vault. Fel får exponentiell väntetid (högst 60 minuter); en femminuters lease hindrar samtidiga arbetare från att skicka samma post. Status och SMTP-kvittens sparas innan nästa försök. SMTP har inte exakt-en-gång-garantier: ett avbrott mellan accepterat mejl och databaskvittens kan ge ett dubbelt mejl. Förfrågan förblir sparad även vid mejlfel.
+
+Tillämpa `supabase/notification-schema.sql` efter grundschemat. SMTP använder Google Workspace på `smtp.gmail.com:465` med det befintliga kontots applösenord. Avsändaren ligger i `SMTP_USER`, lösenordet i `SMTP_APP_PASSWORD`; inga lösenord finns i repot. Det schemalagda jobbet behöver `affarsleads_notification_token` i Vault.
 
 ### Driftsättning av direktformuläret
 

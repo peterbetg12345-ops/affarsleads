@@ -23,6 +23,22 @@ Deno.serve(async (req: Request) => {
     const text = await req.text();
     if (new TextEncoder().encode(text).length > 12000) return json(413, { ok: false });
     const input = JSON.parse(text);
+    if (input.action === 'claimNotifications' || input.action === 'completeNotification') {
+      const token = req.headers.get('x-notification-token') || '';
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+      const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+      if (hash !== '38dc14e86379bf0b029a853533d8e8f02f90efb2af5b3ab316952ad732c2270c') return json(401, {ok:false});
+      const claiming = input.action === 'claimNotifications';
+      if (!claiming && (!/^[a-f0-9-]{36}$/.test(input.requestId || '') || !/^[a-f0-9-]{36}$/.test(input.leaseId || '') || typeof input.delivered !== 'boolean')) return json(400,{ok:false});
+      const result = await fetch(url + '/rest/v1/rpc/' + (claiming ? 'claim_affarsleads_notifications' : 'complete_affarsleads_notification'), {
+        method:'POST', headers:{'Content-Type':'application/json','apikey':serviceKey},
+        body:JSON.stringify(claiming ? {batch_size:Math.max(1,Math.min(Number(input.limit)||1,10))} : {request_uuid:input.requestId,lease_uuid:input.leaseId,delivered:input.delivered,result_code:String(input.resultCode||'').slice(0,254)}),
+        signal:AbortSignal.timeout(10000)
+      });
+      if (!result.ok) return json(502,{ok:false});
+      const value=await result.json();
+      return claiming ? json(200,{ok:true,jobs:value}) : json(value===true?200:409,{ok:value===true});
+    }
     for (const field of ['name', 'company', 'email', 'message', 'requestId', 'clientIp']) {
       if (typeof input[field] !== 'string') return json(400, { ok: false });
     }
