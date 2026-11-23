@@ -22,6 +22,16 @@ const form = document.querySelector('#contact-form');
 const fallback = document.querySelector('#email-fallback');
 const copyText = document.querySelector('#request-copy');
 const status = document.querySelector('#form-status');
+let selectedPackageMessage = '';
+document.querySelectorAll('[data-package]').forEach(link => {
+  link.addEventListener('click', () => {
+    const message = form.elements.namedItem('message');
+    if (!message.value.trim() || message.value === selectedPackageMessage) {
+      selectedPackageMessage = `Vi vill veta mer om ${link.dataset.package}.\n\nVårt företag och de kunder vi vill nå: `;
+      message.value = selectedPackageMessage;
+    }
+  });
+});
 form.addEventListener('submit', event => {
   event.preventDefault();
   const data = new FormData(form);
