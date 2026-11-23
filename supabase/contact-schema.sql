@@ -12,6 +12,8 @@ create table public.affarsleads_enquiries (
   status text not null default 'Ny' check (status in ('Ny', 'Kontaktad', 'Avslutad'))
 );
 alter table public.affarsleads_enquiries enable row level security;
+create policy deny_browser_access on public.affarsleads_enquiries
+  for all to anon, authenticated using (false) with check (false);
 revoke all on table public.affarsleads_enquiries from public, anon, authenticated;
 grant select, insert, update, delete on table public.affarsleads_enquiries to service_role;
 create index affarsleads_enquiries_client_created on public.affarsleads_enquiries (client_hash, created_at);

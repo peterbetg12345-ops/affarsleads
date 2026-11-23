@@ -18,19 +18,21 @@ Besökaren skickar formuläret direkt från sidan till `/api/contact`. Vercel-fu
 
 Vid fel eller timeout behålls formulärets innehåll. Ett återförsök med samma ID och identiska uppgifter ger samma kvittens utan ytterligare rad; samma ID med andra uppgifter avvisas. Honeypot, begränsad requeststorlek, servervalidering och origin-kontroll används. Vercel har en grundläggande per-instans-gräns på fem försök per tio minuter; databasen begränsar dessutom fem nya förfrågningar per klientidentifierare och tio minuter över alla instanser. Detta ersätter inte fullständig botkontroll.
 
-Supabase-tabellen har RLS och inga rättigheter för anonyma eller inloggade webbplatsbesökare. Endast Edge-funktionens serverroll får läsa och skriva. RPC-funktionen är security invoker och får bara anropas av service_role. Rå IP-adress sparas inte; en saltad hash används för försöksgränsen. Inga kontaktuppgifter eller nycklar skrivs till applikationens loggar.
+Supabase-tabellen har RLS och en uttrycklig nekande policy samt inga tabellrättigheter för anonyma eller inloggade webbplatsbesökare. Endast Edge-funktionens serverroll får läsa och skriva. RPC-funktionen är security invoker och får bara anropas av service_role. Rå IP-adress sparas inte; en saltad hash används för försöksgränsen. Inga kontaktuppgifter eller nycklar skrivs till applikationens loggar.
 
 Den separata mejllänken till `peter@affarsleads.se` finns kvar som alternativ. Kontaktflödet skickar inga notifieringsmejl. Förfrågningar läses i Supabase Table Editor.
 
 ### Driftsättning av direktformuläret
 
-Den här ändringen är förberedd, men **inte aktiverad på den offentliga sidan**. Val av Supabase-projekt inväntas. Ingen databas har ändrats för kontaktformuläret.
+Supabase-projekt: **Affärsleads** (`mhsizfalezlahatayyre`), Stockholm, Free. Organisation: `pnwxmguxcwtuuxjlfaie` (AutonomiQs). Läs förfrågningarna i projektets Table Editor: https://supabase.com/dashboard/project/mhsizfalezlahatayyre/editor
 
-1. Välj projekt utan ny kostnad och inspektera befintlig databas. Tillämpa `supabase/contact-schema.sql` som en migration.
+Tabell, RPC och Edge-funktion finns publicerade. Vercel-variablerna är konfigurerade för preview och production. Följande beskriver konfigurationen för framtida driftsättning.
+
+1. Inspektera målets befintliga databas. Tillämpa `supabase/contact-schema.sql` som en migration.
 2. Publicera `supabase/functions/affarsleads-contact/index.ts` med `verify_jwt=false`: den inbyggda JWT-kontrollen stöder inte moderna API-nycklar. Funktionen kontrollerar i stället `apikey` mot `SUPABASE_PUBLISHABLE_KEYS.default` innan den gör något. Supabase tillhandahåller automatiskt `SUPABASE_SECRET_KEYS.default` för lagringen; den får inte kopieras till klientkod eller repot.
 3. Sätt `SUPABASE_URL` och projektets moderna `SUPABASE_PUBLISHABLE_KEY` (namn `default`) som krypterade servervariabler på Vercel för preview och production. Den senare används bara för integrationen och läggs inte i webbläsaren. En publishable-nyckel är inte en hemlighet eller besökarinloggning; tjänsten exponerar bara validerad kontaktinlämning och ger aldrig möjlighet att läsa eller ändra andra poster.
 4. Kör ett verkligt formulärtest, kontrollera raden, idempotenta återförsök och att anon/authenticated inte kan läsa eller skriva i tabellen eller anropa RPC-funktionen. Kontrollera säkerhetsrådgivningen.
-5. Slå samman ändringen först efter verifierad koppling och kontrollera det publika formuläret.
+5. Publicera genom main och kontrollera det publika formuläret. HTTPS- och POST-test ska kvitteras mot databasen.
 
 Gratisplanens gränser gäller. Supabase Free kan pausas efter en veckas inaktivitet; formuläret visar då fel och behåller uppgifterna. Ingen automatisk uppgradering eller betald plan har beställts. Den tidigare Make-lösningen har inte aktiverats och används inte av denna kod.
 
