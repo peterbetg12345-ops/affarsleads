@@ -1,0 +1,6 @@
+.vercel/
+.openai/
+dist/
+node_modules/
+.env*
+!*.example
