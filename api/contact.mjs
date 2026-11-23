@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     if (typeof body[field] !== 'string') return reply(res, 400, {ok:false});
   }
   const name=body.name.trim(), company=body.company.trim(), email=body.email.trim(), message=body.message.trim();
-  const requestId=body.requestId;
+  const requestId=body.requestId.toLowerCase();
   const selectedPackage=typeof body.package === 'string' ? body.package : '';
   if (!name || name.length>120 || !company || company.length>160 || email.length>254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     || message.length<10 || message.length>3000 || !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(requestId)
@@ -46,19 +46,24 @@ export default async function handler(req, res) {
     res.setHeader('Retry-After', '600');
     return reply(res, 429, {ok:false});
   }
-  const webhook=process.env.CONTACT_WEBHOOK_URL;
-  if (!webhook) return reply(res, 503, {ok:false});
+  const supabaseUrl=process.env.SUPABASE_URL;
+  const supabaseKey=process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!supabaseUrl || !supabaseKey) return reply(res, 503, {ok:false});
   current.count+=1;
   attempts.set(ip,current);
   try {
-    const response=await fetch(webhook, {
-      method:'POST',headers:{'Content-Type':'application/json'},redirect:'error',
-      body:JSON.stringify({requestId,name,company,email,message,package:selectedPackage,receivedAt:new Date().toISOString(),source:'affarsleads.se'}),
+    const response=await fetch(`${supabaseUrl.replace(/\/$/, '')}/functions/v1/affarsleads-contact`, {
+      method:'POST',headers:{'Content-Type':'application/json','apikey':supabaseKey},redirect:'error',
+      body:JSON.stringify({requestId,name,company,email,message,package:selectedPackage,clientIp:ip}),
       signal:AbortSignal.timeout(15000)
     });
+    if (response.status===429) {
+      res.setHeader('Retry-After','600');
+      return reply(res,429,{ok:false});
+    }
     if (!response.ok) throw new Error('Storage rejected');
     const saved=await response.json();
-    if (saved.ok!==true || !/^rec[a-zA-Z0-9]+$/.test(saved.recordId || '')) throw new Error('No storage receipt');
+    if (saved.ok!==true || saved.requestId!==requestId) throw new Error('No storage receipt');
     return reply(res, 200, {ok:true,requestId});
   } catch {
     console.error('Contact storage could not be confirmed', requestId);
