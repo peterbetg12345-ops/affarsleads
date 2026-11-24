@@ -6,6 +6,10 @@ Svensk webbplats för Affärsleads: kontaktlistor, copy, e-postutskick och uppf�
 
 HTML, CSS och JavaScript utan byggsteg eller externa frontendberoenden. Nodemailer är versionslåst för serverns SMTP-utskick. En Vercel Node-funktion i `api/contact.mjs` tar emot kontaktförfrågningar. `vercel.json` anger publicering och säkerhetshuvuden. Webbplatsen publiceras på Vercel från GitHub.
 
+## Logotyp
+
+Den godkända logotypen med ett handslag av två pratbubblor finns i `assets/affarsleads-logo.png`. Originalbilden har transparent bakgrund och används oförändrad i sidhuvud, sidfot och illustrationen. CSS visar logotypen genom ett anpassat utsnitt så att bildens transparenta marginaler inte tar plats i layouten.
+
 ## Erbjudande och avsändare
 
 Bas: 10 e-postkonton och cirka 3 000 unika bearbetade kontakter per månad. Tillväxt: 30 konton och cirka 9 000 kontakter. Premium: anpassat upplägg. Volymerna är indikativa och påverkas av uppvärmning, utskickstakt, uppföljningar och målgrupp. Inga priser är fastställda på sidan.
