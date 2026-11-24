@@ -64,10 +64,12 @@ Gratisplanens gränser gäller. Supabase Free kan pausas efter en veckas inaktiv
 
 JavaScript-syntax kontrolleras med `node --check script.js`. Kör backendtesterna med `node --test tests/*.test.mjs`. De täcker validering, avvisad origin, saknad konfiguration, fel hos mottagaren, utebliven lagringskvittens, lyckad lagring och försöksgränsen. En statisk server visar layouten; `/api/contact` kräver en Vercel Functions-miljö.
 
-## Uppläggsguide
+## Uppläggskalkylator
 
-`guide.js` driver tre steg: målgrupp (med frivillig bransch), marknad och planerad kontaktvolym. Resultatet visas före kontaktuppgifterna. Besökaren kan gå tillbaka, ändra sina val eller välja hjälp med målgrupp/omfattning. `guide-model.mjs` mappar upp till 3 000 kontakter till Bas, upp till 9 000 till Tillväxt och högre volym till Premium. Okänd omfattning ger ett gemensamt startförslag utan påtvingat paket. Inga priser eller garanterade affärsresultat beräknas.
+`guide.js` driver en kalkylator där alla val är synliga samtidigt: målgrupp, frivillig bransch, marknad, kontaktvolym och antal uppföljningar. Paketförslag och maxscenario för planerade mejl uppdateras direkt. Volymreglaget har snabbval och inställningarna kan återställas. Kontaktformuläret finns intill sammanställningen, utan separata steg eller låst resultat.
 
-Guidens kontaktformulär och snabbformuläret använder samma validerade `/api/contact`, med separat felstatus och idempotens-ID för respektive formulär. Guidens målgrupp, bransch, marknad, volym, rekommendation och frivilliga fritext sammanställs i meddelandet; rekommenderat paket skickas i befintligt paketfält. Därmed följer alla val med till Supabase och mejlnotisen. Inga val skickas innan besökaren skickar förfrågan.
+`guide-model.mjs` mappar upp till 3 000 kontakter till Bas, upp till 9 000 till Tillväxt och högre volym till Premium. Okänd omfattning ger ett gemensamt startförslag. `estimateWorkload` beräknar kontaktvolym × (ett första mejl + 0–4 uppföljningar). Detta är ett maxscenario om alla kontakter får alla planerade mejl, ingen leverans- eller resultatprognos. Paketförslaget baseras på kontaktvolym; faktisk kapacitet och pris fastställs i offert. Inga priser eller garanterade affärsresultat beräknas.
 
-Testa paketgränserna och meddelandets innehåll med `node --test tests/guide-model.test.mjs`.
+Kalkylatorns kontaktformulär och snabbformuläret använder samma validerade `/api/contact`, med separat felstatus och idempotens-ID. Alla val, inklusive uppföljningar och maxscenario, sammanställs i meddelandet och följer med till Supabase och mejlnotisen. Inga val skickas före förfrågan.
+
+Kör `node --test tests/guide-model.test.mjs` för paketgränser, maxscenario och meddelandets innehåll.
