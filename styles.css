@@ -57,3 +57,24 @@
 @media(max-width:760px){.packages-heading{grid-template-columns:1fr;gap:24px;margin-bottom:30px}.packages-heading .section-intro{margin:0}.packages-grid{grid-template-columns:1fr;gap:22px}.package-card{padding:28px}.package-card h3{font-size:33px}.package-description{min-height:0;max-width:440px;margin-bottom:24px}.package-volume strong{font-size:54px}.package-custom strong{font-size:38px}.package-volume>span{max-width:none;font-size:14px}.package-card .package-button{font-size:14px}.package-note{font-size:13px}.founder-portrait{width:min(100%,240px)}.about-grid h2 em{font-size:27px}.footer-inner p{text-align:left;font-size:12px}.footer-inner p strong{font-size:11px}}
 
 .form-trap{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}.contact-alternative{font-size:13px;color:var(--muted);margin:15px 0 0}.contact-alternative a{text-decoration:underline;text-underline-offset:3px}form[aria-busy="true"] button{opacity:.7;cursor:wait}#form-status[data-state="success"]{background:#e7eedc;border:1px solid #cbd5bc;padding:14px;border-radius:6px;font-size:14px}#form-status[data-state="error"]{background:#fff1e7;border:1px solid #e4c6af;padding:14px;border-radius:6px;color:#773a23;font-size:14px}
+
+/* A compact contact panel combines the hero message, illustration and enquiry. */
+.hero-contact{grid-column:1 / -1;width:100%;padding:30px;background:#e4e7d5;border:1px solid #d0d6bd;border-radius:20px;scroll-margin-top:115px}
+.hero-contact .contact-grid{grid-template-columns:minmax(240px,.8fr) minmax(0,2fr);gap:32px;align-items:center}
+.hero-contact .eyebrow{font-size:12px;margin-bottom:14px}
+.hero-contact .contact-grid h2{font-size:clamp(30px,2.8vw,38px);line-height:1.15;letter-spacing:-1.2px;margin-bottom:16px}
+.hero-contact .contact-grid>.contact-intro>p:not(.eyebrow){font-size:16px;line-height:1.65;margin-bottom:0;max-width:390px}
+.hero-contact .contact-person{margin-top:22px;gap:11px}
+.hero-contact .contact-person div>span{font-size:14px}
+.hero-contact form{padding:24px;min-width:0}
+.contact-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.contact-field{min-width:0}
+.hero-contact input,.hero-contact textarea{font-size:16px;margin-bottom:0;min-height:48px}
+.hero-contact textarea{min-height:104px}
+.contact-message{grid-column:span 2}
+.contact-submit{align-self:end}
+.hero-contact .form-note{font-size:13px;line-height:1.5;margin-top:10px}
+.hero-contact .contact-alternative{font-size:14px;line-height:1.5;margin:16px 0 0}
+.hero-contact #form-status{font-size:15px}
+@media(max-width:1100px){.hero-contact .contact-grid{grid-template-columns:1fr;gap:24px}.hero-contact .contact-intro{display:grid;grid-template-columns:1.15fr 1fr;gap:0 32px;align-items:start}.hero-contact .eyebrow{grid-column:1}.hero-contact .contact-grid h2{grid-column:1;grid-row:2 / span 2;margin-bottom:0}.hero-contact .contact-grid>.contact-intro>p:not(.eyebrow){grid-column:2;grid-row:1 / span 2}.hero-contact .contact-person{grid-column:2;margin-top:16px}}
+@media(max-width:760px){.hero-copy{order:0}.hero-contact{order:1;padding:20px;scroll-margin-top:92px}.hero-visual{order:2}.hero-contact .contact-intro{display:block}.hero-contact .contact-grid h2{font-size:32px;margin-bottom:16px}.hero-contact .contact-person{margin-top:20px}.hero-contact form{padding:18px}.contact-fields{grid-template-columns:1fr;gap:16px}.contact-message{grid-column:auto}.hero-contact textarea{min-height:112px}.contact-submit{margin-top:2px}}

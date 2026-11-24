@@ -18,6 +18,8 @@ Peter Berg presenteras som grundare med det senast uppladdade porträttet i `ass
 
 ## Kontaktflöde
 
+Toppsektionen behåller huvudbudskapet och illustrationen sida vid sida på dator, med ett kompakt kontaktformulär i ett gemensamt fält direkt under. På mobil följer formuläret efter introduktionen och före illustrationen. Det finns ett enda formulär och alla kontaktknappar leder till `#kontakt`.
+
 Besökaren skickar formuläret direkt från sidan till `/api/contact`. Vercel-funktionen validerar uppgifterna och anropar Supabase-funktionen `affarsleads-contact`, som sparar i `public.affarsleads_enquiries`. Ingen Make-anslutning behövs. Bekräftelse visas först när databasen kvitterat samma request-ID.
 
 Vid fel eller timeout behålls formulärets innehåll. Ett återförsök med samma ID och identiska uppgifter ger samma kvittens utan ytterligare rad; samma ID med andra uppgifter avvisas. Honeypot, begränsad requeststorlek, servervalidering och origin-kontroll används. Vercel har en grundläggande per-instans-gräns på fem försök per tio minuter; databasen begränsar dessutom fem nya förfrågningar per klientidentifierare och tio minuter över alla instanser. Detta ersätter inte fullständig botkontroll.
