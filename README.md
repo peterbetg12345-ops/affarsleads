@@ -73,3 +73,11 @@ JavaScript-syntax kontrolleras med `node --check script.js`. Kör backendtestern
 Kalkylatorns kontaktformulär och snabbformuläret använder samma validerade `/api/contact`, med separat felstatus och idempotens-ID. Alla val, inklusive uppföljningar och maxscenario, sammanställs i meddelandet och följer med till Supabase och mejlnotisen. Inga val skickas före förfrågan.
 
 Kör `node --test tests/guide-model.test.mjs` för paketgränser, maxscenario och meddelandets innehåll.
+
+## Integritet och cookies
+
+`integritet.html` beskriver webbplatsbesök och inkommande förfrågningar; den omfattar inte kontaktlistor i kunduppdrag. Länkar finns vid båda formulären och i sidfoten. Inga analys- eller annonsskript, cookies eller webbläsarlagring har lagts till. Samtycke till integritetspolicyn är inte ett obligatoriskt formulärfält; hanteringen av inkommande B2B-frågor grundas på berättigat intresse.
+
+Lagringen beskrivs genom kriterier (pågående handläggning och relevant affärsdialog), inte en automatisk tidsgräns. Peter behöver göra manuell gallringsbedömning när dialogen avslutas och följa upp kvarvarande förfrågningar. Gallringen ska omfatta Supabase-förfrågan och dess notifieringskö samt kopior i avsändarens och mottagarens e-post, inklusive relevanta papperskorgar. Inga befintliga uppgifter raderas av den här webbändringen. Respektera eventuella skyldigheter att bevara särskilda underlag och dokumentera skälet. Vid begäran om rättigheter: verifiera avsändarens identitet i proportion till risken, sök i både databas och e-post och hantera begäran enligt GDPR:s tidsfrister.
+
+Uppdatera informationen när leverantörer, ansvar, ändamål eller lagringsrutiner ändras. Om statistik- eller marknadsföringsteknik införs ska dess faktiska samtyckesbehov bedömas innan aktivering; en banner i sig blockerar inga skript. Leverantörernas publicerade överföringsskydd är länkade på sidan; sidan gör inget påstående om att alla kunduppdrag eller alla avtal därmed har granskats.
