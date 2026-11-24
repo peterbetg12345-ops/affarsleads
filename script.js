@@ -19,10 +19,6 @@ document.addEventListener('keydown', event => {
 });
 document.querySelector('#year').textContent = String(new Date().getFullYear());
 const form = document.querySelector('#contact-form');
-const status = document.querySelector('#form-status');
-const submitButton = form.querySelector('button[type="submit"]');
-let pendingRequestId = null;
-let pendingPayload = null;
 let selectedPackageMessage = '';
 document.querySelectorAll('[data-package]').forEach(link => {
   link.addEventListener('click', () => {
@@ -34,6 +30,12 @@ document.querySelectorAll('[data-package]').forEach(link => {
     form.elements.namedItem('package').value = link.dataset.package;
   });
 });
+document.querySelectorAll('[data-enquiry-form]').forEach(form => {
+const status = form.querySelector('[data-form-status]');
+const submitButton = form.querySelector('button[type="submit"]');
+const defaultButtonText = submitButton.textContent;
+let pendingRequestId = null;
+let pendingPayload = null;
 form.addEventListener('submit', async event => {
   event.preventDefault();
   if (form.getAttribute('aria-busy') === 'true') return;
@@ -68,7 +70,7 @@ form.addEventListener('submit', async event => {
     form.reset();
     pendingRequestId = null;
     pendingPayload = null;
-    selectedPackageMessage = '';
+    if (form.id === 'contact-form') selectedPackageMessage = '';
     status.dataset.state = 'success';
     status.textContent = 'Tack! Vi har tagit emot din förfrågan och återkommer till dig.';
   } catch {
@@ -77,6 +79,8 @@ form.addEventListener('submit', async event => {
   } finally {
     form.removeAttribute('aria-busy');
     submitButton.disabled = false;
-    submitButton.textContent = 'Skicka förfrågan';
+    submitButton.textContent = defaultButtonText;
   }
+});
+
 });

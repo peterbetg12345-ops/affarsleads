@@ -18,7 +18,7 @@ Peter Berg presenteras som grundare med det senast uppladdade porträttet i `ass
 
 ## Kontaktflöde
 
-Toppsektionen behåller huvudbudskapet och illustrationen sida vid sida på dator, med ett kompakt kontaktformulär i ett gemensamt fält direkt under. På mobil följer formuläret efter introduktionen och före illustrationen. Det finns ett enda formulär och alla kontaktknappar leder till `#kontakt`.
+Toppsektionen behåller huvudbudskapet och illustrationen sida vid sida på dator, med ett kompakt kontaktformulär i ett gemensamt fält direkt under. På mobil följer formuläret efter introduktionen och före illustrationen. Det snabba formuläret finns i `#kontakt`. En separat uppläggsguide finns i `#upplagg`.
 
 Besökaren skickar formuläret direkt från sidan till `/api/contact`. Vercel-funktionen validerar uppgifterna och anropar Supabase-funktionen `affarsleads-contact`, som sparar i `public.affarsleads_enquiries`. Ingen Make-anslutning behövs. Bekräftelse visas först när databasen kvitterat samma request-ID.
 
@@ -63,3 +63,11 @@ Gratisplanens gränser gäller. Supabase Free kan pausas efter en veckas inaktiv
 ## Lokal kontroll
 
 JavaScript-syntax kontrolleras med `node --check script.js`. Kör backendtesterna med `node --test tests/*.test.mjs`. De täcker validering, avvisad origin, saknad konfiguration, fel hos mottagaren, utebliven lagringskvittens, lyckad lagring och försöksgränsen. En statisk server visar layouten; `/api/contact` kräver en Vercel Functions-miljö.
+
+## Uppläggsguide
+
+`guide.js` driver tre steg: målgrupp (med frivillig bransch), marknad och planerad kontaktvolym. Resultatet visas före kontaktuppgifterna. Besökaren kan gå tillbaka, ändra sina val eller välja hjälp med målgrupp/omfattning. `guide-model.mjs` mappar upp till 3 000 kontakter till Bas, upp till 9 000 till Tillväxt och högre volym till Premium. Okänd omfattning ger ett gemensamt startförslag utan påtvingat paket. Inga priser eller garanterade affärsresultat beräknas.
+
+Guidens kontaktformulär och snabbformuläret använder samma validerade `/api/contact`, med separat felstatus och idempotens-ID för respektive formulär. Guidens målgrupp, bransch, marknad, volym, rekommendation och frivilliga fritext sammanställs i meddelandet; rekommenderat paket skickas i befintligt paketfält. Därmed följer alla val med till Supabase och mejlnotisen. Inga val skickas innan besökaren skickar förfrågan.
+
+Testa paketgränserna och meddelandets innehåll med `node --test tests/guide-model.test.mjs`.
