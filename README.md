@@ -76,8 +76,14 @@ Kör `node --test tests/guide-model.test.mjs` för paketgränser, maxscenario oc
 
 ## Integritet och cookies
 
-`integritet.html` beskriver webbplatsbesök och inkommande förfrågningar; den omfattar inte kontaktlistor i kunduppdrag. Länkar finns vid båda formulären och i sidfoten. Inga analys- eller annonsskript, cookies eller webbläsarlagring har lagts till. Samtycke till integritetspolicyn är inte ett obligatoriskt formulärfält; hanteringen av inkommande B2B-frågor grundas på berättigat intresse.
+`integritet.html` beskriver webbplatsbesök och inkommande förfrågningar; den omfattar inte kontaktlistor i kunduppdrag. Länkar finns vid båda formulären och i sidfoten. Inga annonsskript, cookies eller webbläsarlagring har lagts till. Förberedd besöksstatistik beskrivs nedan. Samtycke till integritetspolicyn är inte ett obligatoriskt formulärfält; hanteringen av inkommande B2B-frågor grundas på berättigat intresse.
 
 Lagringen beskrivs genom kriterier (pågående handläggning och relevant affärsdialog), inte en automatisk tidsgräns. Peter behöver göra manuell gallringsbedömning när dialogen avslutas och följa upp kvarvarande förfrågningar. Gallringen ska omfatta Supabase-förfrågan och dess notifieringskö samt kopior i avsändarens och mottagarens e-post, inklusive relevanta papperskorgar. Inga befintliga uppgifter raderas av den här webbändringen. Respektera eventuella skyldigheter att bevara särskilda underlag och dokumentera skälet. Vid begäran om rättigheter: verifiera avsändarens identitet i proportion till risken, sök i både databas och e-post och hantera begäran enligt GDPR:s tidsfrister.
 
 Uppdatera informationen när leverantörer, ansvar, ändamål eller lagringsrutiner ändras. Om statistik- eller marknadsföringsteknik införs ska dess faktiska samtyckesbehov bedömas innan aktivering; en banner i sig blockerar inga skript. Leverantörernas publicerade överföringsskydd är länkade på sidan; sidan gör inget påstående om att alla kunduppdrag eller alla avtal därmed har granskats.
+
+## Besöksstatistik: förberedd för Vercel Web Analytics
+
+`analytics.js` laddar Vercels dokumenterade HTML-skript `/_vercel/insights/script.js` på båda publika sidorna, enbart på `affarsleads.se` och `www.affarsleads.se`. Köfunktionen och beforeSend-filtret laddas först. Förhandsvisningar, andra sökvägar, GPC och Do Not Track laddar inte statistiken. beforeSend tillåter endast sidvisningar och tar bort query och fragment; inga formulärdata eller egna events rapporteras. Befintlig CSP tillåter samma ursprung, så den behöver inte breddas.
+
+**Aktivering återstår i Vercel:** projektet affarsleads → Analytics → Enable, därefter en ny driftsättning. Inloggning kunde inte slutföras i agentens webbläsare. Kontrollera sedan att scriptet ger 200, att sidvisningsanrop accepteras och att besök syns i kontrollpanelen. Markera inte installationen som verifierad innan detta har gjorts. På nuvarande Hobby-plan ingår 50 000 events/månad sammanlagt för teamet och en månads rapportfönster; inga betaltillägg aktiveras.
