@@ -14,7 +14,7 @@ Den godkända logotypen med ett handslag av två pratbubblor finns i `assets/aff
 
 Bas: 10 e-postkonton och cirka 3 000 unika bearbetade kontakter per månad. Tillväxt: 30 konton och cirka 9 000 kontakter. Premium: anpassat upplägg. Volymerna är indikativa och påverkas av uppvärmning, utskickstakt, uppföljningar och målgrupp. Inga priser är fastställda på sidan.
 
-Peter presenteras som grundare, med porträttet i `assets/peter-retouched.png`, lätt ljusare ögonvitor och mindre visningsstorlek. Det ursprungliga porträttet finns i `assets/peter.png`. Erfarenhetsbeskrivningen bygger på Peters uppgifter: tidigare Head Lead Gen Expert på en av Storbritanniens största mötesbokningssajter. Verksamheten drivs av SMEDJAN KREATIV MEDIA.
+Peter Berg presenteras som grundare med det senast uppladdade porträttet i `assets/peter-profile.png` och den mindre visningsstorleken. Erfarenhetsbeskrivningen bygger på Peters uppgifter: tidigare Head Lead Gen Expert på en av Storbritanniens största mötesbokningssajter. Verksamheten drivs av SMEDJAN KREATIV MEDIA.
 
 ## Kontaktflöde
 
