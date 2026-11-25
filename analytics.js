@@ -1,29 +1,70 @@
 'use strict';
 (() => {
-  // Count public production pages only. No form values or custom events.
   const hosts = new Set(['affarsleads.se', 'www.affarsleads.se']);
   const paths = new Set(['/', '/index.html', '/integritet.html']);
-  if (!hosts.has(location.hostname) || !paths.has(location.pathname)
-    || navigator.globalPrivacyControl === true || navigator.doNotTrack === '1') return;
-
-  window.va = window.va || function () {
-    (window.vaq = window.vaq || []).push(arguments);
-  };
-  window.va('beforeSend', event => {
-    if (event.type !== 'pageview') return null;
+  const panel = document.querySelector('#analytics-consent');
+  const settings = document.querySelector('[data-analytics-settings]');
+  if (!panel || !settings || !hosts.has(location.hostname) || !paths.has(location.pathname)) return;
+  const cookieName = 'afl_stats_v1';
+  const blocked = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1';
+  let loaded = false;
+  let returnFocus = false;
+  function choice() {
+    const entry = document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(cookieName + '='));
+    const value = entry ? entry.slice(cookieName.length + 1) : '';
+    return value === 'yes' || value === 'no' ? value : '';
+  }
+  function permitted() { return choice() === 'yes' && !blocked; }
+  function beforeSend(event) {
+    if (!permitted() || event.type !== 'pageview') return null;
     try {
       const url = new URL(event.url);
-      if (!hosts.has(url.hostname) || !paths.has(url.pathname)) return null;
-      // Never send query parameters or fragments, including campaign tokens.
+      if (url.protocol !== 'https:' || !hosts.has(url.hostname) || !paths.has(url.pathname)) return null;
       url.search = '';
       url.hash = '';
       return {...event, url: url.toString()};
-    } catch {
-      return null;
-    }
+    } catch { return null; }
+  }
+  function loadAnalytics() {
+    if (loaded || !permitted()) return;
+    loaded = true;
+    window.va = window.va || function () {
+      (window.vaq = window.vaq || []).push(arguments);
+    };
+    window.va('beforeSend', beforeSend);
+    const script = document.createElement('script');
+    script.defer = true;
+    script.src = '/_vercel/insights/script.js';
+    document.head.appendChild(script);
+  }
+  function show() {
+    panel.hidden = false;
+    settings.setAttribute('aria-expanded', 'true');
+  }
+  function hide() {
+    panel.hidden = true;
+    settings.setAttribute('aria-expanded', 'false');
+    if (returnFocus) { settings.focus(); returnFocus = false; }
+  }
+  settings.hidden = false;
+  panel.querySelector('[data-analytics-browser-choice]').hidden = !blocked;
+  settings.addEventListener('click', () => {
+    returnFocus = true;
+    show();
+    panel.querySelector('[data-analytics-choice]').focus();
   });
-  const script = document.createElement('script');
-  script.defer = true;
-  script.src = '/_vercel/insights/script.js';
-  document.head.appendChild(script);
+  panel.querySelectorAll('[data-analytics-choice]').forEach(button => {
+    button.addEventListener('click', () => {
+      const wasPermitted = permitted();
+      const value = button.dataset.analyticsChoice === 'yes' ? 'yes' : 'no';
+      document.cookie = cookieName + '=' + value + '; Max-Age=15552000; Path=/; SameSite=Lax; Secure';
+      hide();
+      if (value === 'yes') {
+        if (loaded && !wasPermitted && permitted()) window.va('pageview', {path: location.pathname});
+        else loadAnalytics();
+      }
+    });
+  });
+  if (choice()) { hide(); loadAnalytics(); }
+  else show();
 })();
