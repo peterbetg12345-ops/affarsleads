@@ -56,6 +56,10 @@
 .package-enterprise h3{font-size:28px;letter-spacing:-.7px;margin:0 0 10px}
 .package-enterprise p:not(.package-kicker){font-size:16px;line-height:1.7;max-width:760px;margin:0;color:var(--muted)}
 .package-enterprise .button{flex-shrink:0;min-width:160px}
+.package-niche{background:#f9f6ed;border-color:#cbd2ba;align-items:center}
+.package-niche .package-kicker{color:#60764d}
+.package-niche .button{background:transparent;color:var(--green);border:1px solid var(--green)}
+.package-niche .button:hover{background:#e5e8d8}
 .package-terms{margin-top:38px;padding-top:30px;border-top:1px solid #ced3be}
 .package-terms h3{font-size:27px;margin-bottom:21px;letter-spacing:-.6px}
 .package-term-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
