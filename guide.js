@@ -1,4 +1,4 @@
-import {recommendPackage,guideSummary,guideMessage,estimateWorkload} from './guide-model.mjs';
+import {recommendPackage,guideSummary,guideMessage,estimateWorkload,estimatePricing} from './guide-model.mjs';
 
 const calculator=document.querySelector('#upplagg');
 const options=calculator.querySelector('#guide-options');
@@ -7,11 +7,10 @@ const volume=options.elements.namedItem('volume');
 const followUps=options.elements.namedItem('followUps');
 const help=options.elements.namedItem('helpVolume');
 const format=value=>Number(value).toLocaleString('sv-SE');
-let previousPackage='';
 
 function state(){
  const data=new FormData(options);
- return {audience:String(data.get('audience')||'Företagsägare och VD'),otherAudience:String(data.get('otherAudience')||''),industry:String(data.get('industry')||''),market:String(data.get('market')||'Sverige'),otherMarket:String(data.get('otherMarket')||''),volume:Number(volume.value),followUps:Number(followUps.value),needsHelp:help.checked};
+ return {audience:String(data.get('audience')||'Företagsägare och VD'),otherAudience:String(data.get('otherAudience')||''),industry:String(data.get('industry')||''),market:String(data.get('market')||'Sverige'),otherMarket:String(data.get('otherMarket')||''),volume:Number(volume.value),followUps:Number(followUps.value),agreement:String(data.get('agreement')||'monthly'),needsHelp:help.checked};
 }
 function syncMessage(){
  const choices=state();
@@ -25,6 +24,8 @@ function paintRange(input){
 function refresh(announce=false){
  const choices=state(),summary=guideSummary(choices),recommendation=recommendPackage(choices.volume,choices.needsHelp);
  const workload=estimateWorkload(choices.volume,choices.followUps,choices.needsHelp);
+ const pricing=estimatePricing(choices.volume,choices.agreement,choices.needsHelp);
+ const money=value=>value===null?'Enligt offert':`${format(value)} kr`;
  volume.disabled=choices.needsHelp;
  calculator.querySelector('#guide-volume-output').textContent=choices.needsHelp?'Vi väljer tillsammans':format(choices.volume);
  calculator.querySelector('#guide-followup-output').textContent=String(choices.followUps);
@@ -33,7 +34,12 @@ function refresh(announce=false){
  paintRange(volume);paintRange(followUps);
  calculator.querySelector('#guide-other-audience').hidden=choices.audience!=='Annan målgrupp';
  calculator.querySelector('#guide-other-market').hidden=choices.market!=='Annan marknad';
- calculator.querySelector('#calc-package').textContent=recommendation.package||'Vi väljer ihop';
+ calculator.querySelector('#calc-package').textContent=recommendation.label;
+ calculator.querySelector('#calc-price').textContent=pricing.monthlyPrice===null?'Kontakta oss':`${money(pricing.monthlyPrice)} / mån`;
+ calculator.querySelector('#calc-setup').textContent=pricing.setupFee===null?'Uppstart enligt offert':`${money(pricing.setupFee)} i uppstart`;
+ calculator.querySelector('#calc-first-month').textContent=pricing.firstMonthTotal===null?'Vi återkommer med pris för ert upplägg.':`Första kampanjmånaden: ${money(pricing.firstMonthTotal)} inklusive uppstart.`;
+ calculator.querySelector('#calc-agreement').textContent=choices.agreement==='quarterly'?'3 månader, sedan månadsvis':'Månadsvis med uppstart';
+ calculator.querySelector('#calc-capacity').textContent=pricing.contacts?`Paketet omfattar upp till ${format(pricing.contacts)} nya unika kontakter per månad. Valda uppföljningar ingår.`:'Vi anpassar kontaktvolym och pris i en offert. Uppföljningar ingår i upplägget.';
  calculator.querySelector('#calc-result').dataset.package=recommendation.package||'custom';
  calculator.querySelector('#calc-contacts').textContent=workload?format(workload.contacts):'Anpassat';
  calculator.querySelector('#calc-messages').textContent=workload?format(workload.maxMessages):'Anpassat';
@@ -46,10 +52,9 @@ function refresh(announce=false){
   const selected=!choices.needsHelp&&Number(button.dataset.volume)===choices.volume;
   button.setAttribute('aria-pressed',String(selected));
  });
- if(announce&&recommendation.package!==previousPackage){
-  calculator.querySelector('#calc-announcement').textContent=recommendation.package?`Paketförslag: ${recommendation.package}.`:'Vi hjälper er välja rätt omfattning.';
+ if(announce){
+  calculator.querySelector('#calc-announcement').textContent=`Paketförslag: ${recommendation.label}. ${money(pricing.monthlyPrice)} per månad. Uppstart: ${money(pricing.setupFee)}. Priser exklusive moms.`;
  }
- previousPackage=recommendation.package;
  syncMessage();
 }
 options.addEventListener('input',()=>refresh());

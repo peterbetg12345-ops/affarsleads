@@ -20,11 +20,11 @@ document.addEventListener('keydown', event => {
 document.querySelector('#year').textContent = String(new Date().getFullYear());
 const form = document.querySelector('#contact-form');
 let selectedPackageMessage = '';
-document.querySelectorAll('[data-package]').forEach(link => {
+document.querySelectorAll('a[data-package]').forEach(link => {
   link.addEventListener('click', () => {
     const message = form.elements.namedItem('message');
     if (!message.value.trim() || message.value === selectedPackageMessage) {
-      selectedPackageMessage = `Vi vill veta mer om ${link.dataset.package}.\n\nVårt företag och de kunder vi vill nå: `;
+      selectedPackageMessage = `Vi vill veta mer om ${link.dataset.packageName || link.dataset.package}.\n\nVårt företag och de kunder vi vill nå: `;
       message.value = selectedPackageMessage;
     }
     form.elements.namedItem('package').value = link.dataset.package;
