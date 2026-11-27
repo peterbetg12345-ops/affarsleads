@@ -10,10 +10,23 @@
   let analytics = null;
   let loading = false;
   let returnFocus = false;
-  function choice() {
-    const entry = document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(cookieName + '='));
-    const value = entry ? entry.slice(cookieName.length + 1) : '';
-    return value === 'yes' || value === 'no' ? value : '';
+  let transientChoice = null;
+  function savedChoice() {
+    try {
+      const entry = document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(cookieName + '='));
+      const value = entry ? entry.slice(cookieName.length + 1) : '';
+      return value === 'yes' || value === 'no' ? value : '';
+    } catch { return ''; }
+  }
+  function choice() { return transientChoice ?? savedChoice(); }
+  function rememberChoice(value) {
+    try {
+      document.cookie = cookieName + '=' + value + '; Max-Age=15552000; Path=/; SameSite=Lax; Secure';
+      transientChoice = savedChoice() === value ? null : value;
+    } catch {
+      // Honor this explicit choice for the current page, then ask again next visit.
+      transientChoice = value;
+    }
   }
   function permitted() { return choice() === 'yes' && !blocked; }
   function beforeSend(event) {
@@ -63,7 +76,7 @@
     button.addEventListener('click', () => {
       const wasPermitted = permitted();
       const value = button.dataset.analyticsChoice === 'yes' ? 'yes' : 'no';
-      document.cookie = cookieName + '=' + value + '; Max-Age=15552000; Path=/; SameSite=Lax; Secure';
+      rememberChoice(value);
       hide();
       if (value === 'yes' && (!wasPermitted || !analytics)) loadAnalytics();
     });

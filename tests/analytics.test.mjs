@@ -9,7 +9,7 @@ const client = await readFile(new URL('analytics.js', root), 'utf8');
 const sdk = await readFile(new URL('node_modules/@vercel/analytics/dist/index.mjs', root), 'utf8');
 const configuration = JSON.stringify({analytics: {scriptSrc: '/intake/script.js', viewEndpoint: '/intake/view'}});
 
-async function fixture({choice = '', dnt = false, host = 'affarsleads.se'} = {}) {
+async function fixture({choice = '', dnt = false, host = 'affarsleads.se', storage = 'ok'} = {}) {
   const elements = new Map();
   function element(key) {
     if (!elements.has(key)) elements.set(key, {hidden: true, dataset: {}, listeners: {}, setAttribute() {}, focus() {}, addEventListener(type, fn) { this.listeners[type] = fn; }});
@@ -26,8 +26,8 @@ async function fixture({choice = '', dnt = false, host = 'affarsleads.se'} = {})
     querySelector: element,
     createElement: () => ({dataset: {}}),
     head: {appendChild: script => scripts.push(script), querySelector: () => scripts[0] || null},
-    get cookie() { return cookie; },
-    set cookie(value) { cookie = value.split(';')[0]; }
+    get cookie() { if (storage === 'throw') throw Error('Cookie access denied'); return cookie; },
+    set cookie(value) { if (storage === 'throw') throw Error('Cookie access denied'); if (storage !== 'ignoreWrites') cookie = value.split(';')[0]; }
   };
   const context = vm.createContext({window: {}, document, navigator: {doNotTrack: dnt ? '1' : '0'}, location: {hostname: host, pathname: '/'}, URL, console});
   let imports = 0;
@@ -68,6 +68,21 @@ test('Returning approved visitors load once; approving again does not duplicate 
   assert.equal(f.imports(), 1);
   assert.equal(f.scripts.length, 1);
 });
+
+for (const storage of ['ignoreWrites', 'throw']) {
+  test(`Explicit approval and withdrawal work when cookie storage is ${storage}`, async () => {
+    const f = await fixture({storage});
+    assert.equal(f.imports(), 0);
+    await f.click('yes');
+    assert.equal(f.scripts.length, 1);
+    const filter = f.beforeSend();
+    assert.ok(filter({type: 'pageview', url: 'https://affarsleads.se/'}));
+    await f.click('no');
+    assert.equal(filter({type: 'pageview', url: 'https://affarsleads.se/'}), null);
+    const nextVisit = await fixture({storage});
+    assert.equal(nextVisit.imports(), 0);
+  });
+}
 
 test('Privacy signals and preview hosts prevent tracking', async () => {
   for (const options of [{choice: 'yes', dnt: true}, {choice: 'yes', host: 'affarsleads.vercel.app'}]) {
