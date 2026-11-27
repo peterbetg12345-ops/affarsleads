@@ -7,7 +7,8 @@
   if (!panel || !settings || !hosts.has(location.hostname) || !paths.has(location.pathname)) return;
   const cookieName = 'afl_stats_v1';
   const blocked = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1';
-  let loaded = false;
+  let analytics = null;
+  let loading = false;
   let returnFocus = false;
   function choice() {
     const entry = document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(cookieName + '='));
@@ -26,16 +27,21 @@
     } catch { return null; }
   }
   function loadAnalytics() {
-    if (loaded || !permitted()) return;
-    loaded = true;
-    window.va = window.va || function () {
-      (window.vaq = window.vaq || []).push(arguments);
-    };
-    window.va('beforeSend', beforeSend);
-    const script = document.createElement('script');
-    script.defer = true;
-    script.src = '/_vercel/insights/script.js';
-    document.head.appendChild(script);
+    if (!permitted() || loading) return;
+    if (analytics) {
+      analytics.pageview({path: location.pathname});
+      return;
+    }
+    loading = true;
+    import('/assets/vercel-analytics.mjs').then(module => {
+      loading = false;
+      if (!permitted()) return;
+      module.inject({mode: 'production', beforeSend}, module.analyticsConfiguration);
+      analytics = module;
+    }).catch(error => {
+      loading = false;
+      console.error('[Affärsleads] Besöksstatistiken kunde inte laddas.', error);
+    });
   }
   function show() {
     panel.hidden = false;
@@ -59,10 +65,7 @@
       const value = button.dataset.analyticsChoice === 'yes' ? 'yes' : 'no';
       document.cookie = cookieName + '=' + value + '; Max-Age=15552000; Path=/; SameSite=Lax; Secure';
       hide();
-      if (value === 'yes') {
-        if (loaded && !wasPermitted && permitted()) window.va('pageview', {path: location.pathname});
-        else loadAnalytics();
-      }
+      if (value === 'yes' && (!wasPermitted || !analytics)) loadAnalytics();
     });
   });
   if (choice()) { hide(); loadAnalytics(); }

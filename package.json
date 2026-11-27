@@ -2,7 +2,11 @@
   "name": "affarsleads",
   "private": true,
   "version": "1.0.0",
+  "scripts": {
+    "build": "node scripts/build-analytics.mjs"
+  },
   "dependencies": {
+    "@vercel/analytics": "2.0.1",
     "nodemailer": "10.6.1"
   }
 }
