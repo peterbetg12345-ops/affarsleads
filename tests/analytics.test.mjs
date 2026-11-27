@@ -87,12 +87,16 @@ test('Page views strip query strings and fragments; form/custom events are dropp
   assert.equal(filter({type: 'pageview', url: 'https://affarsleads.se/'}), null);
 });
 
-test('Build includes only allowed public paths, never unrelated configuration', async () => {
+test('Build accepts deployment paths and official intake origins, never unrelated configuration', async () => {
   const env = {...process.env, VERCEL_OBSERVABILITY_CLIENT_CONFIG: JSON.stringify({analytics: {scriptSrc: '/deployment/script.js', viewEndpoint: '/deployment/view', privateKey: 'DO_NOT_EXPOSE'}, unrelatedSecret: 'DO_NOT_EXPOSE'})};
   execFileSync(process.execPath, ['scripts/build-analytics.mjs'], {cwd: root, env});
   const output = await readFile(new URL('assets/vercel-analytics.mjs', root), 'utf8');
   assert.ok(output.includes('/deployment/script.js'));
   assert.ok(!output.includes('DO_NOT_EXPOSE'));
+  execFileSync(process.execPath, ['scripts/build-analytics.mjs'], {cwd: root, env: {...env, VERCEL_OBSERVABILITY_CLIENT_CONFIG: '{"analytics":{"scriptSrc":"intake/script.js","viewEndpoint":"https://vitals.vercel-insights.com/v1/view"}}'}});
+  const normalized = await readFile(new URL('assets/vercel-analytics.mjs', root), 'utf8');
+  assert.ok(normalized.includes('/intake/script.js'));
+  assert.ok(normalized.includes('https://vitals.vercel-insights.com/v1/view'));
   assert.throws(() => execFileSync(process.execPath, ['scripts/build-analytics.mjs'], {cwd: root, env: {...env, VERCEL_OBSERVABILITY_CLIENT_CONFIG: '{"analytics":{"scriptSrc":"https://other.example/script.js"}}'}, stdio: 'pipe'}));
   execFileSync(process.execPath, ['scripts/build-analytics.mjs'], {cwd: root, env: {...process.env, VERCEL_OBSERVABILITY_CLIENT_CONFIG: ''}});
 });

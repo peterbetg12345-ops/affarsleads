@@ -5,6 +5,7 @@ const root = new URL('../', import.meta.url);
 const destination = new URL('assets/vercel-analytics.mjs', root);
 const sdk = await readFile(fileURLToPath(import.meta.resolve('@vercel/analytics')), 'utf8');
 const configuration = {};
+const origins = new Set(['https://affarsleads.se', 'https://www.affarsleads.se', 'https://va.vercel-scripts.com', 'https://vitals.vercel-insights.com']);
 const raw = process.env.VERCEL_OBSERVABILITY_CLIENT_CONFIG;
 if (raw) {
   const analytics = JSON.parse(raw).analytics;
@@ -12,10 +13,11 @@ if (raw) {
     for (const key of ['scriptSrc', 'viewEndpoint', 'eventEndpoint', 'sessionEndpoint']) {
       const value = analytics[key];
       if (value === undefined) continue;
-      if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || /[\r\n]/.test(value)) {
-        throw new Error(`Invalid same-origin analytics setting: ${key}`);
-      }
-      configuration[key] = value;
+      if (typeof value !== 'string' || /[\r\n]/.test(value)) throw new Error(`Invalid analytics setting: ${key}`);
+      const url = new URL(value, 'https://affarsleads.se/');
+      console.log(`Analytics intake ${key}: ${url.origin}${url.pathname}`);
+      if (!origins.has(url.origin) || url.username || url.password) throw new Error(`Unexpected analytics origin: ${url.origin}`);
+      configuration[key] = url.origin === 'https://affarsleads.se' ? url.pathname + url.search : url.href;
     }
   }
 }
