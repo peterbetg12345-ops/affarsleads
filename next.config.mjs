@@ -2,7 +2,15 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  async redirects() {return [{source: '/index.html', destination: '/', permanent: true}];},
+  async redirects() {return [
+    {
+      source: '/:path*',
+      has: [{type: 'host', value: 'affarsleads.vercel.app'}],
+      destination: 'https://affarsleads.se/:path*',
+      permanent: true
+    },
+    {source: '/index.html', destination: '/', permanent: true}
+  ];},
   async headers() {return [{source: '/:path*', headers: [
     {key: 'X-Content-Type-Options', value: 'nosniff'},
     {key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin'}
