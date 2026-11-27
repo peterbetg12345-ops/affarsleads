@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {notifyPending,notificationMessage,RECIPIENT} from '../server/notifications.mjs';
-import worker from '../api/notifications.mjs';
+import worker from '../server/notifications-handler.mjs';
 const job={requestId:'c6151338-c0aa-471e-93e7-9996131b7ce1',leaseId:'c6151338-c0aa-471e-93e7-9996131b7ce2',name:'Testperson',company:'Testföretag\r\nHeader',email:'test@example.test',message:'Testmeddelande med <taggar>.',package:'Bas',receivedAt:'2026-11-23T12:00:00Z',to:'wrong@example.test'};
 test('notification delivery has a fixed recipient, reply-to, stored receipt and retry on SMTP failure',async()=>{
  const names=['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','NOTIFICATION_TOKEN','SMTP_USER','SMTP_APP_PASSWORD'];

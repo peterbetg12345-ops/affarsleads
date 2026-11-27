@@ -1,5 +1,8 @@
-import {recommendPackage,guideSummary,guideMessage,estimateWorkload,estimatePricing} from './guide-model.mjs';
+import {recommendPackage,guideSummary,guideMessage,estimateWorkload,estimatePricing} from '../../guide-model.mjs';
 
+export function initCalculator() {
+const controller = new AbortController();
+const on = (target, type, listener, options = {}) => target.addEventListener(type, listener, {...options, signal: controller.signal});
 const calculator=document.querySelector('#upplagg');
 const options=calculator.querySelector('#guide-options');
 const leadForm=calculator.querySelector('#guide-contact-form');
@@ -57,15 +60,18 @@ function refresh(announce=false){
  }
  syncMessage();
 }
-options.addEventListener('input',()=>refresh());
-options.addEventListener('change',()=>refresh(true));
-options.addEventListener('submit',event=>event.preventDefault());
-calculator.querySelectorAll('[data-volume]').forEach(button=>button.addEventListener('click',()=>{
+on(options, 'input',()=>refresh());
+on(options, 'change',()=>refresh(true));
+on(options, 'submit',event=>event.preventDefault());
+calculator.querySelectorAll('[data-volume]').forEach(button=>on(button, 'click',()=>{
  volume.value=button.dataset.volume;help.checked=false;refresh(true);
 }));
-calculator.querySelector('#calc-reset').addEventListener('click',()=>{options.reset();refresh(true);});
-leadForm.addEventListener('submit',syncMessage,{capture:true});
-leadForm.addEventListener('input',syncMessage);
+on(calculator.querySelector('#calc-reset'), 'click',()=>{options.reset();refresh(true);});
+on(leadForm, 'submit',syncMessage,{capture:true});
+on(leadForm, 'input',syncMessage);
 refresh();
 calculator.querySelector('.guide-fallback').hidden=true;
 calculator.querySelector('.guide-interactive').hidden=false;
+
+return () => controller.abort();
+}

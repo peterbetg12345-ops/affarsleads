@@ -1,17 +1,19 @@
-'use strict';
+export function initSite() {
+const controller = new AbortController();
+const on = (target, type, listener, options = {}) => target.addEventListener(type, listener, {...options, signal: controller.signal});
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#navigation');
 function closeMenu() {
   menuButton.setAttribute('aria-expanded', 'false');
   navigation.classList.remove('is-open');
 }
-menuButton.addEventListener('click', () => {
+on(menuButton, 'click', () => {
   const open = menuButton.getAttribute('aria-expanded') !== 'true';
   menuButton.setAttribute('aria-expanded', String(open));
   navigation.classList.toggle('is-open', open);
 });
-navigation.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
-document.addEventListener('keydown', event => {
+navigation.querySelectorAll('a').forEach(link => on(link, 'click', closeMenu));
+on(document, 'keydown', event => {
   if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
     closeMenu();
     menuButton.focus();
@@ -21,7 +23,7 @@ document.querySelector('#year').textContent = String(new Date().getFullYear());
 const form = document.querySelector('#contact-form');
 let selectedPackageMessage = '';
 document.querySelectorAll('a[data-package]').forEach(link => {
-  link.addEventListener('click', () => {
+  on(link, 'click', () => {
     const message = form.elements.namedItem('message');
     if (!message.value.trim() || message.value === selectedPackageMessage) {
       selectedPackageMessage = `Vi vill veta mer om ${link.dataset.packageName || link.dataset.package}.\n\nVårt företag och de kunder vi vill nå: `;
@@ -36,7 +38,7 @@ const submitButton = form.querySelector('button[type="submit"]');
 const defaultButtonText = submitButton.textContent;
 let pendingRequestId = null;
 let pendingPayload = null;
-form.addEventListener('submit', async event => {
+on(form, 'submit', async event => {
   event.preventDefault();
   if (form.getAttribute('aria-busy') === 'true') return;
   const data = new FormData(form);
@@ -84,3 +86,6 @@ form.addEventListener('submit', async event => {
 });
 
 });
+
+return () => controller.abort();
+}

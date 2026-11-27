@@ -1,4 +1,4 @@
-import {notifyPending} from '../server/notifications.mjs';
+import {notifyPending} from './notifications.mjs';
 
 const attempts = new Map();
 const WINDOW_MS = 10 * 60 * 1000;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler from '../api/contact.mjs';
+import handler from '../server/contact-handler.mjs';
 
 let serial=0;
 const valid={name:'Testperson',company:'Testföretag',email:'test@example.test',message:'En förfrågan som enbart används i test.',requestId:'00000000-0000-4000-8000-000000000001',package:'Bas',website:''};

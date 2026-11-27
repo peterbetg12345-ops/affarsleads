@@ -1,8 +1,8 @@
+node_modules/
+.next/
 .vercel/
 .openai/
 dist/
-node_modules/
 .env*
 !*.example
-assets/vercel-analytics.mjs
-assets/vercel-analytics-LICENSE.txt
+next-env.d.ts

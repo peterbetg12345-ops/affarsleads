@@ -4,17 +4,19 @@ Svensk webbplats för Affärsleads: kontaktlistor, copy, e-postutskick och uppf�
 
 ## Teknik
 
-HTML, CSS och JavaScript utan byggsteg eller externa frontendberoenden. Nodemailer är versionslåst för serverns SMTP-utskick. En Vercel Node-funktion i `api/contact.mjs` tar emot kontaktförfrågningar. `vercel.json` anger publicering och säkerhetshuvuden. Webbplatsen publiceras på Vercel från GitHub.
+Next.js 16 App Router med React 19, Node 24 och officiella `@vercel/analytics/next`. Serverrenderade JSX-sidor och samma CSS, bilder och innehåll som tidigare. `app/components/site-interactions.jsx` startar menyn, formulären och kalkylatorn med återställningsbara eventlyssnare. `pages/api/contact.js` och `pages/api/notifications.js` exponerar de befintliga, testade serverfunktionerna. Supabase och SMTP fortsätter med samma servervariabler. Webbplatsen publiceras på Vercel från GitHub.
+
+`proxy.js` ger varje sidförfrågan en egen CSP-nonce som Next.js använder för sina skript. Inga generella inline-skript tillåts. Bilder, favicon, robots och sitemap ligger i `public/`. `/integritet.html` finns kvar; `/index.html` omdirigeras permanent till startsidan.
 
 ## Logotyp
 
-Den godkända logotypen med ett handslag av två pratbubblor finns i `assets/affarsleads-logo.png`. Originalbilden har transparent bakgrund och används oförändrad i sidhuvud, sidfot och illustrationen. CSS visar logotypen genom ett anpassat utsnitt så att bildens transparenta marginaler inte tar plats i layouten.
+Den godkända logotypen med ett handslag av två pratbubblor finns i `public/assets/affarsleads-logo.png`. Originalbilden har transparent bakgrund och används oförändrad i sidhuvud, sidfot och illustrationen. CSS visar logotypen genom ett anpassat utsnitt så att bildens transparenta marginaler inte tar plats i layouten.
 
 ## Erbjudande och avsändare
 
-Bas: 10 e-postkonton och cirka 3 000 unika bearbetade kontakter per månad. Tillväxt: 30 konton och cirka 9 000 kontakter. Premium: anpassat upplägg. Volymerna är indikativa och påverkas av uppvärmning, utskickstakt, uppföljningar och målgrupp. Inga priser är fastställda på sidan.
+Bas: upp till 2 000 nya unika kontakter, 11 990 kr/mån och 3 000 kr i uppstart. Tillväxt: 4 000 kontakter, 19 990 kr/mån och 5 000 kr i uppstart. Premium: 8 000 kontakter, 29 990 kr/mån och 7 500 kr i uppstart. Större volymer från 10 000 samt särskilt nischade målgrupper offereras. Uppföljningar ingår och räknas inte som nya kontakter. Alla priser är exklusive moms. Uppstart betalas vid månadsavtal; med tre månaders bindningstid slopas den. Månadskostnaden börjar när utskicken startar.
 
-Peter Berg presenteras som grundare med det senast uppladdade porträttet i `assets/peter-profile.png` och den mindre visningsstorleken. Erfarenhetsbeskrivningen bygger på Peters uppgifter: tidigare Head Lead Gen Expert på en av Storbritanniens största mötesbokningssajter. Verksamheten drivs av SMEDJAN KREATIV MEDIA.
+Peter Berg presenteras som grundare med det senast uppladdade porträttet i `public/assets/peter-profile.png` och den mindre visningsstorleken. Erfarenhetsbeskrivningen bygger på Peters uppgifter: tidigare Head Lead Gen Expert på en av Storbritanniens största mötesbokningssajter. Verksamheten drivs av SMEDJAN KREATIV MEDIA.
 
 ## Kontaktflöde
 
@@ -62,13 +64,13 @@ Gratisplanens gränser gäller. Supabase Free kan pausas efter en veckas inaktiv
 
 ## Lokal kontroll
 
-JavaScript-syntax kontrolleras med `node --check script.js`. Kör backendtesterna med `node --test tests/*.test.mjs`. De täcker validering, avvisad origin, saknad konfiguration, fel hos mottagaren, utebliven lagringskvittens, lyckad lagring och försöksgränsen. En statisk server visar layouten; `/api/contact` kräver en Vercel Functions-miljö.
+Kör `npm ci`, `npm run build` och `npm test`. Testerna täcker paketgränser, kontaktinlämning, idempotens, SMTP-kvittens, avvisade anrop och statistikens integritetsskydd. Starta det byggda projektet med `npm start -- --port 3100` och kör `TEST_ORIGIN=http://127.0.0.1:3100 npm test` för DOM-kontroller av båda sidorna, kalkylatorns val, formulärpayload och hantering av återmontering. Testerna använder simulerad formulärleverans och skickar inga verkliga förfrågningar.
 
 ## Uppläggskalkylator
 
-`guide.js` driver en kalkylator där alla val är synliga samtidigt: målgrupp, frivillig bransch, marknad, kontaktvolym och antal uppföljningar. Paketförslag och maxscenario för planerade mejl uppdateras direkt. Volymreglaget har snabbval och inställningarna kan återställas. Kontaktformuläret finns intill sammanställningen, utan separata steg eller låst resultat.
+`app/components/calculator-client.mjs` driver en kalkylator där alla val är synliga samtidigt: målgrupp, frivillig bransch, marknad, kontaktvolym och antal uppföljningar. Paketförslag och maxscenario för planerade mejl uppdateras direkt. Volymreglaget har snabbval och inställningarna kan återställas. Kontaktformuläret finns intill sammanställningen, utan separata steg eller låst resultat.
 
-`guide-model.mjs` mappar upp till 3 000 kontakter till Bas, upp till 9 000 till Tillväxt och högre volym till Premium. Okänd omfattning ger ett gemensamt startförslag. `estimateWorkload` beräknar kontaktvolym × (ett första mejl + 0–4 uppföljningar). Detta är ett maxscenario om alla kontakter får alla planerade mejl, ingen leverans- eller resultatprognos. Paketförslaget baseras på kontaktvolym; faktisk kapacitet och pris fastställs i offert. Inga priser eller garanterade affärsresultat beräknas.
+`guide-model.mjs` mappar upp till 2 000 kontakter till Bas, upp till 4 000 till Tillväxt och upp till 8 000 till Premium. Högre eller okänd volym ger offert. `estimatePricing` visar månadspris, uppstart och första kampanjmånadens total utifrån avtalsvalet. `estimateWorkload` visar kontaktvolym × (ett första mejl + 0–4 uppföljningar), ett maxscenario utan löften om leverans eller resultat.
 
 Kalkylatorns kontaktformulär och snabbformuläret använder samma validerade `/api/contact`, med separat felstatus och idempotens-ID. Alla val, inklusive uppföljningar och maxscenario, sammanställs i meddelandet och följer med till Supabase och mejlnotisen. Inga val skickas före förfrågan.
 
@@ -76,7 +78,7 @@ Kör `node --test tests/guide-model.test.mjs` för paketgränser, maxscenario oc
 
 ## Integritet och cookies
 
-`integritet.html` beskriver webbplatsbesök och inkommande förfrågningar; den omfattar inte kontaktlistor i kunduppdrag. Länkar finns vid båda formulären och i sidfoten. Inga annonsskript har lagts till. Besöksstatistik och den nödvändiga kakan för statistikvalet beskrivs nedan. Samtycke till integritetspolicyn är inte ett obligatoriskt formulärfält; hanteringen av inkommande B2B-frågor grundas på berättigat intresse.
+`app/integritet.html/page.jsx` beskriver webbplatsbesök och inkommande förfrågningar; den omfattar inte kontaktlistor i kunduppdrag. Länkar finns vid båda formulären och i sidfoten. Inga annonsskript har lagts till. Besöksstatistik och den nödvändiga kakan för statistikvalet beskrivs nedan. Samtycke till integritetspolicyn är inte ett obligatoriskt formulärfält; hanteringen av inkommande B2B-frågor grundas på berättigat intresse.
 
 Lagringen beskrivs genom kriterier (pågående handläggning och relevant affärsdialog), inte en automatisk tidsgräns. Peter behöver göra manuell gallringsbedömning när dialogen avslutas och följa upp kvarvarande förfrågningar. Gallringen ska omfatta Supabase-förfrågan och dess notifieringskö samt kopior i avsändarens och mottagarens e-post, inklusive relevanta papperskorgar. Inga befintliga uppgifter raderas av den här webbändringen. Respektera eventuella skyldigheter att bevara särskilda underlag och dokumentera skälet. Vid begäran om rättigheter: verifiera avsändarens identitet i proportion till risken, sök i både databas och e-post och hantera begäran enligt GDPR:s tidsfrister.
 
@@ -84,10 +86,10 @@ Uppdatera informationen när leverantörer, ansvar, ändamål eller lagringsruti
 
 ## Besöksstatistik med frivilligt samtycke
 
-`analytics.js` och banner på båda publika sidorna laddar Vercel Web Analytics endast efter uttryckligt godkännande. Lika utformade knappar för att neka och godkänna. Ett uteblivet val ger ingen insamling. Statistikinställningar i sidfoten öppnar valet igen. Den nödvändiga preferenskakan `afl_stats_v1` innehåller yes/no och sparas i högst 180 dagar (Secure, SameSite=Lax, Path=/). Ingen annan egen webbläsarlagring används.
+`app/components/privacy-controls.jsx` monterar den officiella Next.js-komponenten för Vercel Web Analytics endast efter uttryckligt godkännande. Lika utformade knappar för att neka och godkänna. Ett uteblivet val ger ingen insamling. Statistikinställningar i sidfoten öppnar valet igen. Den nödvändiga preferenskakan `afl_stats_v1` innehåller yes/no och sparas i högst 180 dagar (Secure, SameSite=Lax, Path=/). Ingen annan egen webbläsarlagring används.
 
 Vercels nuvarande klient innehåller lokal-lagringsfunktioner för attribution även om vi inte använder identifierings- eller gruppfunktionerna. Hela klienten hålls därför avstängd före samtycke. Återkallelse spärrar framtida anrop genom beforeSend-filtret. DNT/GPC har företräde och blockerar statistik även vid ett sparat ja.
 
-Endast `affarsleads.se`, `www.affarsleads.se` och sidvägarna /, /index.html, /integritet.html tillåts. beforeSend godkänner enbart sidvisningar och tar bort query och fragment; inga formulärdata, egna händelser eller identifieringsanrop tillåts. Förhandsvisningar laddar inte statistiken. CSP behöver inte breddas.
+Endast `affarsleads.se`, `www.affarsleads.se` och sidvägarna /, /index.html, /integritet.html tillåts. beforeSend godkänner enbart sidvisningar och tar bort query och fragment; inga formulärdata, egna händelser eller identifieringsanrop tillåts. Förhandsvisningar laddar inte statistiken. CSP använder en nonce och strict-dynamic så att Next.js och dess officiella statistikklient kan laddas utan unsafe-inline.
 
-Användaren bekräftade aktivering i Vercel den 25 november 2026. Driftsättning från main publicerar HTML och skript; Vercels klient svarar HTTP 200. Avläsning av statistik via connectorns count-API ger ännu “Web Analytics not found”, så mottagen sidvisning är inte verifierad. Nästa kontroll är ett vanligt besök med godkänd statistik och Analytics-panelen i projektet affarsleads. På nuvarande Hobby-plan ingår 50 000 events/månad sammanlagt för teamet och en månads rapportfönster; inget betaltillägg har aktiverats.
+Analytics är aktiverat i det befintliga Vercel-projektet. Komponenten använder Vercels automatiska publika Next.js-konfiguration för skript- och mottagningsadresser. Ingen separat byggd SDK-kopia används. Connectorns statistik-API har svarat ”Web Analytics not found” även för Sportpuls där statistiken fungerar, så detta fel är inte bevis för utebliven aktivering. Mottagna sidvisningar måste bedömas i Analytics-panelen; bygg- och HTTP-kontroller visar inte i sig att ett verkligt besök har räknats. Ingen automatiserad webbläsare behöver öppnas för bygg-, API- och DOM-testerna.
